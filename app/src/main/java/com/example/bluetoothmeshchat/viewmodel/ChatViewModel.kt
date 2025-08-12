@@ -21,7 +21,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     private val meshRepo = MeshRepository(app)
 
     private val _messages = MutableStateFlow<List<MessageEntity>>(emptyList())
-    fun observeMessages(): List<MessageEntity> = _messages.value
+    val messages: StateFlow<List<MessageEntity>> = _messages.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -29,7 +29,6 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
                 _messages.value = list
             }
         }
-        // Start the Bluetooth service to accept and forward messages
         app.startService(Intent(app, BluetoothMeshService::class.java))
     }
 
@@ -37,7 +36,6 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val saved = messagesRepo.insertOutgoing(text, identity)
             val env = meshRepo.toEnvelope(saved)
-            // Fire-and-forget: Service will forward to peers
             appContext().startService(Intent(appContext(), BluetoothMeshService::class.java).apply {
                 action = "SEND"
                 putExtra("payload", kotlinx.serialization.json.Json.encodeToString(com.example.bluetoothmeshchat.model.WireEnvelope.serializer(), env))

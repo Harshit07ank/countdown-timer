@@ -3,6 +3,7 @@ package com.example.bluetoothmeshchat.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -17,16 +18,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.bluetoothmeshchat.ui.screens.ChatScreen
 import com.example.bluetoothmeshchat.ui.screens.PeersScreen
+import com.example.bluetoothmeshchat.ui.screens.SettingsScreen
 
 private sealed class Screen(val route: String, val label: String) {
     data object Chat : Screen("chat", "Chat")
     data object Peers : Screen("peers", "Peers")
+    data object Settings : Screen("settings", "Settings")
 }
 
 @Composable
 fun AppScaffold() {
     val navController = rememberNavController()
-    val items = listOf(Screen.Chat, Screen.Peers)
+    val items = listOf(Screen.Chat, Screen.Peers, Screen.Settings)
 
     Scaffold(
         bottomBar = {
@@ -37,8 +40,11 @@ fun AppScaffold() {
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     NavigationBarItem(
                         icon = {
-                            if (screen is Screen.Chat) Icon(Icons.Default.Chat, contentDescription = null)
-                            else Icon(Icons.Default.People, contentDescription = null)
+                            when (screen) {
+                                Screen.Chat -> Icon(Icons.Default.Chat, contentDescription = null)
+                                Screen.Peers -> Icon(Icons.Default.People, contentDescription = null)
+                                Screen.Settings -> Icon(Icons.Default.Settings, contentDescription = null)
+                            }
                         },
                         label = { Text(screen.label) },
                         selected = selected,
@@ -57,6 +63,7 @@ fun AppScaffold() {
         NavHost(navController, startDestination = Screen.Chat.route, modifier = androidx.compose.ui.Modifier.padding(paddingValues)) {
             composable(Screen.Chat.route) { ChatScreen() }
             composable(Screen.Peers.route) { PeersScreen() }
+            composable(Screen.Settings.route) { SettingsScreen() }
         }
     }
 }
